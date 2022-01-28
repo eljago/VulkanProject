@@ -86,6 +86,10 @@ private:
 
         // We've now specified everything Vulkan needs to create an instance and we can finally issue the vkCreateInstance call:
         VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
+
+        if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create instance!");
+        }
     }
 
 private:
