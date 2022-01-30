@@ -70,6 +70,7 @@ private:
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions;
 
+        // Returns the Vulkan instance extensions required by GLFW
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
         // The last two members of the struct determine the global validation layers to enable
@@ -77,6 +78,12 @@ private:
         createInfo.ppEnabledExtensionNames = glfwExtensions;
 
         createInfo.enabledLayerCount = 0;
+
+        std::cout << "GLFW required extensions:\n";
+
+        for(uint32_t indx = 0; indx < glfwExtensionCount; ++indx) {
+            std::cout << '\t' << glfwExtensions[indx] << '\n';
+        }
 
         // We've now specified everything Vulkan needs to create an instance and we can finally issue the vkCreateInstance call:
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
@@ -88,7 +95,7 @@ private:
         std::vector<VkExtensionProperties> extensions(extensionCount);
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
-        std::cout << "available extensions:\n";
+        std::cout << "Available extensions:\n";
 
         for (const auto& extension : extensions) {
             std::cout << '\t' << extension.extensionName << '\n';
