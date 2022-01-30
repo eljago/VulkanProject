@@ -48,3 +48,32 @@ As you'll see, the general pattern that object creation function parameters in V
 - Pointer to custom allocator callbacks, always nullptr in this tutorial
 - Pointer to the variable that stores the handle to the new object
 
+### What are validation layers?
+
+The Vulkan API is designed around the idea of minimal driver overhead and one of the manifestations of that goal is that there is very limited error checking in the API by default. Even mistakes as simple as setting enumerations to incorrect values or passing null pointers to required parameters are generally not explicitly handled and will simply result in crashes or undefined behavior. Because Vulkan requires you to be very explicit about everything you're doing, it's easy to make many small mistakes like using a new GPU feature and forgetting to request it at logical device creation time.
+
+However, that doesn't mean that these checks can't be added to the API. Vulkan introduces an elegant system for this known as validation layers. Validation layers are optional components that hook into Vulkan function calls to apply additional operations. Common operations in validation layers are:
+
+- Checking the values of parameters against the specification to detect misuse
+- Tracking creation and destruction of objects to find resource leaks
+- Checking thread safety by tracking the threads that calls originate from
+- Logging every call and its parameters to the standard output
+- Tracing Vulkan calls for profiling and replaying
+
+Here's an example of what the implementation of a function in a diagnostics validation layer could look like:
+
+```cpp
+VkResult vkCreateInstance(
+    const VkInstanceCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkInstance* instance) {
+
+    if (pCreateInfo == nullptr || instance == nullptr) {
+        log("Null pointer passed to required parameter!");
+        return VK_ERROR_INITIALIZATION_FAILED;
+    }
+
+    return real_vkCreateInstance(pCreateInfo, pAllocator, instance);
+}
+```
+
