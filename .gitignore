@@ -88,4 +88,4 @@ Temporary Items
 
 
 .env.cmake
-build/VulkanApp.exe
+build/VulkanApp*

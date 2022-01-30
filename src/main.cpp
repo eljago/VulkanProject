@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib> // EXIT_SUCCESS & EXIT_FAILURE macros
+#include <vector>
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -17,7 +18,6 @@ public:
         initVulkan();
         mainLoop();
         cleanup();
-        createInstance();
     }
 
 private:
@@ -35,8 +35,6 @@ private:
 
     void initVulkan() {
         createInstance();
-
-
     }
 
     void mainLoop() {
@@ -56,39 +54,44 @@ private:
 
         // This struct is optional
         VkApplicationInfo appInfo{};
-        {
-            appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-            appInfo.pApplicationName = "Hello Triangle";
-            appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-            appInfo.pEngineName = "No Engine";
-            appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-            appInfo.apiVersion = VK_API_VERSION_1_0;
-        }
+        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        appInfo.pApplicationName = "Hello Triangle";
+        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.pEngineName = "No Engine";
+        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.apiVersion = VK_API_VERSION_1_0;
 
         // This next struct is not optional and tells the Vulkan driver which global extensions and validation
         // layers we want to use. Global here means that they apply to the entire program and not a specific device,
         VkInstanceCreateInfo createInfo{};
-        {
-            createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-            createInfo.pApplicationInfo = &appInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        createInfo.pApplicationInfo = &appInfo;
 
-            uint32_t glfwExtensionCount = 0;
-            const char** glfwExtensions;
+        uint32_t glfwExtensionCount = 0;
+        const char** glfwExtensions;
 
-            glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-            // The last two members of the struct determine the global validation layers to enable
-            createInfo.enabledExtensionCount = glfwExtensionCount;
-            createInfo.ppEnabledExtensionNames = glfwExtensions;
+        // The last two members of the struct determine the global validation layers to enable
+        createInfo.enabledExtensionCount = glfwExtensionCount;
+        createInfo.ppEnabledExtensionNames = glfwExtensions;
 
-            createInfo.enabledLayerCount = 0;
-        }
+        createInfo.enabledLayerCount = 0;
 
         // We've now specified everything Vulkan needs to create an instance and we can finally issue the vkCreateInstance call:
-        VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
-
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");
+        }
+
+        uint32_t extensionCount = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+        std::vector<VkExtensionProperties> extensions(extensionCount);
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+
+        std::cout << "available extensions:\n";
+
+        for (const auto& extension : extensions) {
+            std::cout << '\t' << extension.extensionName << '\n';
         }
     }
 
